@@ -29,13 +29,15 @@ const { buffer, idrTimestamps } = await flattenFmp4ToMp4WithOptions(
 After building (or when installed as a package), you can remux from the command line:
 
 ```bash
-npx fmp4-mp4-remuxer --init init.mp4 --out out.mp4 frag-001.m4s frag-002.m4s
+npx fmp4-mp4-remuxer --out out.mp4
 ```
 
-Or read fragments from a directory (sorted by filename):
+By default, the CLI reads from `./fmp4-files` and auto-detects `init.mp4` (or `init.m4s`) plus fragment files.
+
+You can also point it at a different directory:
 
 ```bash
-npx fmp4-mp4-remuxer --init init.mp4 --out out.mp4 --fragments-dir ./frags --normalize-across-files
+npx fmp4-mp4-remuxer --dir ./fmp4-files --out out.mp4 --normalize-across-files
 ```
 
 ## API

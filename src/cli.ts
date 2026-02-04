@@ -6,10 +6,10 @@ import path from 'node:path';
 import { flattenFmp4ToMp4WithOptions } from './core/index';
 
 type CliOptions = {
-  initPath: string;
+  dirPath: string;
+  initPath?: string;
   outPath: string;
   fragments: string[];
-  fragmentsDir?: string;
   normalizeAcrossFiles: boolean;
   allowTrunDataOffsetFallback: boolean;
 };
@@ -18,24 +18,28 @@ function printHelp(): void {
   // Keep this dependency-free (no commander/yargs).
   process.stdout.write(`\
 Usage:
-  fmp4-mp4-remuxer --init <init.mp4> --out <out.mp4> [options] <fragment1> <fragment2> ...
+  fmp4-mp4-remuxer [options]
+  fmp4-mp4-remuxer [options] <fragment1> <fragment2> ...
 
 Options:
-  --init <path>                         Path to init segment (contains moov)
-  --out <path>                          Output MP4 path
-  --fragments-dir <dir>                 Read fragments from a directory (sorted by filename)
+  --dir <dir>                           Directory containing fMP4 files (default: ./fmp4-files)
+  --init <path>                          Path to init segment (optional; auto-detected by default)
+  --out <path>                           Output MP4 path (default: ./out.mp4)
   --normalize-across-files              Normalize timestamps across multiple inputs
   --allow-trun-data-offset-fallback     Allow fallback parsing when trun.data_offset is missing
   -h, --help                            Show this help
 
 Examples:
-  fmp4-mp4-remuxer --init init.mp4 --out out.mp4 frag-001.m4s frag-002.m4s
-  fmp4-mp4-remuxer --init init.mp4 --out out.mp4 --fragments-dir ./frags --normalize-across-files
+  fmp4-mp4-remuxer --out out.mp4
+  fmp4-mp4-remuxer --dir ./fmp4-files --out out.mp4
+  fmp4-mp4-remuxer --init ./fmp4-files/init.mp4 --out out.mp4 ./fmp4-files/seg-001.m4s ./fmp4-files/seg-002.m4s
 `);
 }
 
 function parseArgs(argv: string[]): CliOptions | { help: true } {
   const options: Partial<CliOptions> = {
+    dirPath: path.resolve(process.cwd(), 'fmp4-files'),
+    outPath: path.resolve(process.cwd(), 'out.mp4'),
     fragments: [],
     normalizeAcrossFiles: false,
     allowTrunDataOffsetFallback: false
@@ -48,8 +52,8 @@ function parseArgs(argv: string[]): CliOptions | { help: true } {
       return { help: true };
     }
 
-    if (arg === '--init') {
-      options.initPath = argv[++index];
+    if (arg === '--dir') {
+      options.dirPath = argv[++index];
       continue;
     }
 
@@ -58,8 +62,8 @@ function parseArgs(argv: string[]): CliOptions | { help: true } {
       continue;
     }
 
-    if (arg === '--fragments-dir') {
-      options.fragmentsDir = argv[++index];
+    if (arg === '--init') {
+      options.initPath = argv[++index];
       continue;
     }
 
@@ -80,12 +84,10 @@ function parseArgs(argv: string[]): CliOptions | { help: true } {
     options.fragments!.push(arg);
   }
 
-  if (!options.initPath) {
-    throw new Error('Missing required option: --init <path>');
-  }
-
-  if (!options.outPath) {
-    throw new Error('Missing required option: --out <path>');
+  options.dirPath = path.resolve(process.cwd(), options.dirPath!);
+  options.outPath = path.resolve(process.cwd(), options.outPath!);
+  if (options.initPath) {
+    options.initPath = path.resolve(process.cwd(), options.initPath);
   }
 
   return options as CliOptions;
@@ -113,6 +115,33 @@ async function listFragmentFiles(dirPath: string): Promise<string[]> {
   return files;
 }
 
+function pickInitFile(filePaths: string[]): string | undefined {
+  const initCandidates = filePaths.filter((filePath) => {
+    const baseName = path.basename(filePath).toLowerCase();
+    return baseName === 'init.mp4' || baseName === 'init.m4s';
+  });
+
+  if (initCandidates.length === 1) {
+    return initCandidates[0];
+  }
+
+  if (initCandidates.length > 1) {
+    throw new Error(`Multiple init segment candidates found: ${initCandidates.map((p) => path.basename(p)).join(', ')}`);
+  }
+
+  return undefined;
+}
+
+function isLikelyFragmentFile(filePath: string): boolean {
+  const baseName = path.basename(filePath).toLowerCase();
+  if (baseName === 'init.mp4' || baseName === 'init.m4s') {
+    return false;
+  }
+
+  const ext = path.extname(baseName);
+  return ext === '.m4s' || ext === '.mp4' || ext === '.bin';
+}
+
 async function main(): Promise<void> {
   const parsed = parseArgs(process.argv.slice(2));
   if ('help' in parsed) {
@@ -121,14 +150,20 @@ async function main(): Promise<void> {
     return;
   }
 
-  const { initPath, outPath, fragmentsDir, fragments, normalizeAcrossFiles, allowTrunDataOffsetFallback } = parsed;
+  const { dirPath, initPath, outPath, fragments, normalizeAcrossFiles, allowTrunDataOffsetFallback } = parsed;
 
-  const fragmentPaths = fragmentsDir ? await listFragmentFiles(fragmentsDir) : fragments;
-  if (fragmentPaths.length === 0) {
-    throw new Error('No fragments provided. Pass fragment paths as positional args or use --fragments-dir <dir>.');
+  const dirFiles = await listFragmentFiles(dirPath);
+  const resolvedInitPath = initPath ?? pickInitFile(dirFiles);
+  if (!resolvedInitPath) {
+    throw new Error('Init segment not found. Put init.mp4 (or init.m4s) in --dir, or pass --init <path>.');
   }
 
-  const init = toArrayBuffer(await readFile(initPath));
+  const fragmentPaths = fragments.length > 0 ? fragments.map((p) => path.resolve(process.cwd(), p)) : dirFiles.filter(isLikelyFragmentFile);
+  if (fragmentPaths.length === 0) {
+    throw new Error('No fragments found. Put .m4s fragments in --dir or pass fragment paths as positional args.');
+  }
+
+  const init = toArrayBuffer(await readFile(resolvedInitPath));
   const fragmentBuffers = await Promise.all(fragmentPaths.map(async (p) => toArrayBuffer(await readFile(p))));
 
   const { buffer, idrTimestamps } = await flattenFmp4ToMp4WithOptions(

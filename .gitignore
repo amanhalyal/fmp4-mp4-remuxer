@@ -1,5 +1,6 @@
 node_modules/
 dist/
+fmp4-files/
 .DS_Store
 *.log
 *.tsbuildinfo
