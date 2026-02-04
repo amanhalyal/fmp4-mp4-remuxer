@@ -1,14 +1,12 @@
 {
   "name": "fmp4-mp4-remuxer",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Browser/Node-friendly fMP4 fragments to MP4 remuxer (video track)",
   "license": "MIT",
   "type": "module",
-
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -16,14 +14,13 @@
       "require": "./dist/index.cjs"
     }
   },
-
   "bin": {
     "fmp4-mp4-remuxer": "./dist/cli.js"
   },
-
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
-
   "keywords": [
     "mp4",
     "fmp4",
@@ -34,17 +31,14 @@
     "media",
     "iso-bmff"
   ],
-
   "homepage": "https://github.com/amanhalyal/fmp4-mp4-remuxer#readme",
   "bugs": {
     "url": "https://github.com/amanhalyal/fmp4-mp4-remuxer/issues"
   },
-
   "repository": {
     "type": "git",
     "url": "git+https://github.com/amanhalyal/fmp4-mp4-remuxer.git"
   },
-
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -52,7 +46,6 @@
     "prepublishOnly": "npm run clean && npm run build && npm run typecheck",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
-
   "devDependencies": {
     "@types/node": "^22.13.1",
     "rimraf": "^6.0.1",
