@@ -15,7 +15,7 @@
     }
   },
   "bin": {
-    "fmp4-mp4-remuxer": "./dist/cli.js"
+    "fmp4-mp4-remuxer": "dist/cli.js"
   },
   "files": [
     "dist"
