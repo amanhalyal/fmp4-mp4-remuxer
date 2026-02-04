@@ -1,4 +1,4 @@
-import type { TrackConfig } from '../types/Types.ts';
+import type { TrackConfig } from '../types/Types';
 import { parseBoxes, readU32, readType, sliceBox } from './Mp4BoxParser';
 
 export class InitSegmentParser {

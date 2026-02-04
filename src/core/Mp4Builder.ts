@@ -1,5 +1,5 @@
-import type { FlatMp4Result, Sample, TrackConfig } from '../types/Types.ts';
-import { concat } from './Mp4BoxParser.js';
+import type { FlatMp4Result, Sample, TrackConfig } from '../types/Types';
+import { concat } from './Mp4BoxParser';
 
 function rle(values: number[]): Array<{ count: number; value: number }> {
 	const out: Array<{ count: number; value: number }> = [];

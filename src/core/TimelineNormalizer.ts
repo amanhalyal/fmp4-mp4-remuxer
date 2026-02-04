@@ -1,4 +1,4 @@
-import type { FlattenOptions, Sample } from '../types/Types.ts';
+import type { FlattenOptions, Sample } from '../types/Types';
 
 export class TimelineNormalizer {
 	inferDurationsWithinFile(samples: Sample[]): { samples: Sample[]; fileDuration: number } {

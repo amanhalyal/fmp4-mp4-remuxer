@@ -1,34 +1,36 @@
 {
   "name": "fmp4-mp4-remuxer",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.1.0",
+  "description": "Browser/Node-friendly fMP4 fragments to MP4 remuxer (video track)",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "bin": {
+    "fmp4-mp4-remuxer": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
   "scripts": {
-    "dev": "ts-node src/core/index.ts",
-    "server": "ts-node server/websocket-server.ts",
-    "test": "vitest"
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rimraf dist",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://quadra16@github.com/quadra16/fmp4-mp4-remuxer.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/quadra16/fmp4-mp4-remuxer/issues"
-  },
-  "homepage": "https://github.com/quadra16/fmp4-mp4-remuxer#readme",
   "devDependencies": {
-    "@types/node": "^25.2.0",
-    "@types/ws": "^8.18.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
-  },
-  "dependencies": {
-    "uuid": "^13.0.0",
-    "ws": "^8.19.0"
+    "@types/node": "^22.13.1",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.0.2",
+    "typescript": "^5.7.3"
   }
 }
