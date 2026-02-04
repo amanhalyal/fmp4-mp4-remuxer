@@ -62,4 +62,4 @@ npm run typecheck
 
 ## License
 
-Not set yet. Add a license before publishing publicly.
+Not set yet. Add a license before publishing publicly. Test
