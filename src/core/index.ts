@@ -1,5 +1,6 @@
 import type { FlatMp4Result, FlattenOptions } from '../types/Types';
 import { u8, parseBoxes, summarizeTopLevelBoxes } from './Mp4BoxParser';
+export * from './MfraParser';
 import { InitSegmentParser } from './InitSegmentParser';
 import { FragmentParser } from './FragmentParser';
 import { TimelineNormalizer } from './TimelineNormalizer';

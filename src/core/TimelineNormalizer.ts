@@ -48,9 +48,16 @@ export class TimelineNormalizer {
 
 			if (i > 0) {
 				const prev = withIndex[i - 1].s;
-				if (cur.dts < prev.dts) cur.dts = prev.dts;
-				const prevEnd = prev.dts + Math.max(1, prev.duration);
-				if (cur.dts < prevEnd) cur.dts = prevEnd;
+					let targetDts = cur.dts;
+					if (targetDts < prev.dts) targetDts = prev.dts;
+					const prevEnd = prev.dts + Math.max(1, prev.duration);
+					if (targetDts < prevEnd) targetDts = prevEnd;
+
+					const shift = targetDts - cur.dts;
+					if (shift > 0) {
+						cur.dts += shift;
+						cur.cts += shift;
+					}
 			}
 
 			if (cur.cts < cur.dts) cur.cts = cur.dts;
