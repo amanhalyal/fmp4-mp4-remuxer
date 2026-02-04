@@ -147,7 +147,7 @@ npm run typecheck
 
 ## License
 
-Not set yet. Add a license such as MIT before publishing publicly.
+This project is released under the MIT License — see the `LICENSE` file for details.
 
 ## Purpose
 
