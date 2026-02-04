@@ -1,6 +1,6 @@
 {
   "name": "fmp4-mp4-remuxer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Browser/Node-friendly fMP4 fragments to MP4 remuxer (video track)",
   "license": "UNLICENSED",
   "type": "module",
